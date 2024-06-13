@@ -6,18 +6,14 @@ import { Model, Table, Column } from "sequelize-typescript";
   tableName: "users",
 })
 export class User extends Model<User> {
-  @Column({
-    type: DataTypes.STRING,
-    allowNull: false,
-  })
+  @Column({ type: DataTypes.STRING, allowNull: false })
   name!: string;
 
-  @Column({
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  })
+  @Column({ type: DataTypes.STRING, allowNull: false, unique: true })
   email!: string;
+
+  @Column({ type: DataTypes.STRING, allowNull: false, unique: true })
+  password!: string;
 
   @Column({
     type: DataTypes.DATE,
