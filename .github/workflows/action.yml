@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: Checkout du code source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Configuration Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
 
       - name: Installation des dépendances
         run: cd api && npm install
