@@ -10,7 +10,11 @@ app.use(express.json());
 app.use("/api", mainRouter);
 
 app.get("*", (req: Request, res: Response) => {
-  return "error 404 - bingo reunion";
+  return res.status(404).json("error 404 - bingo reunion");
+});
+
+app.use((req: Request, res: Response) => {
+  return res.status(404).json("error 404 - bingo reunion");
 });
 
 initializeDatabase().then(() => {
