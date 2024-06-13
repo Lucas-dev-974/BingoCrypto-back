@@ -9,7 +9,7 @@ app.use(express.json());
 
 app.use("/api", mainRouter);
 
-app.use("*", (req: Request, res: Response) => {
+app.get("*", (req: Request, res: Response) => {
   return "error 404 - bingo reunion";
 });
 
