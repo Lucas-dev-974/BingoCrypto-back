@@ -16,6 +16,7 @@ const hostDB = process.env.HOST_DB || "localhost";
 const dialectDB = process.env.DIALECT_DB || "postgres";
 
 console.log("database:", database, userDB, passwordDB);
+console.log("dialect db:", dialectDB);
 
 export const initializeDatabase = async (): Promise<typeof db> => {
   let sequelize: Sequelize = new Sequelize(database, userDB, passwordDB, {
