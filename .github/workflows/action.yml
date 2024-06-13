@@ -31,7 +31,7 @@ jobs:
 
       - name: Vérification des secrets FTP
         run: echo "FTP_SERVER: ${{ secrets.FTP_SERVER }}, FTP_USER: ${{ secrets.FTP_USER }}"
-        
+
       - name: Déploiement sur le serveur FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -39,4 +39,5 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
+          
 # Ajoutez d'autres étapes de déploiement si nécessaire, par exemple, un déploiement sur un serveur de production, des notifications, etc.
