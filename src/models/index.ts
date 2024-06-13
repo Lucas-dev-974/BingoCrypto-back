@@ -13,7 +13,7 @@ const database = process.env.DATABASE || "database";
 const userDB = process.env.USER_DB || "user_db";
 const passwordDB = process.env.PASSWORD_DB || "passord_db";
 const hostDB = process.env.HOST_DB || "localhost";
-const dialectDB = process.env.DIABLECT_DB || "postres";
+const dialectDB = process.env.DIALECT_DB || "postgres";
 
 console.log("database:", database, userDB, passwordDB);
 
