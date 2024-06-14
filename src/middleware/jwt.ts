@@ -57,7 +57,7 @@ class AuthMiddleware {
       const match = await bcrypt.compare(password, hashedPassword);
       return match;
     } catch (error) {
-      throw new Error("Error comparing passwords");
+      return false;
     }
   }
 }
