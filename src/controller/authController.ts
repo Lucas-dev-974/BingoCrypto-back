@@ -4,6 +4,7 @@ import validate from "validate.js";
 import AuthMiddleware from "../middleware/jwt";
 import { UniqueConstraintError } from "sequelize";
 import { UserInterface } from "../interface/models";
+import EmailService from "../services/mailer";
 
 export class AuthControlleur {
   static async login(req: Request, res: Response) {
@@ -78,6 +79,16 @@ export class AuthControlleur {
         token: AuthMiddleware.generateToken({ ...user }),
       };
 
+      try {
+        await EmailService.sendEmail(
+          "lucas.lvn97439@gmail.com",
+          "teste",
+          "ceci est un texte pour tester le service de mailing"
+        );
+      } catch (error) {
+        // ! TODO manage error mail
+      }
+
       return res.status(200).json(userToReturn);
     } catch (error) {
       console.log(error);
@@ -85,6 +96,7 @@ export class AuthControlleur {
       if (error instanceof UniqueConstraintError) {
         return res.status(400).json({ message: "Cet email est déjà utilisé." });
       }
+
       return res.status(403).json("error");
     }
   }
