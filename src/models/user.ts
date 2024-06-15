@@ -1,33 +1,30 @@
-import { DataTypes } from "sequelize";
-import { Model, Table, Column } from "sequelize-typescript";
+"use strict";
 
-@Table({
-  timestamps: true,
-  tableName: "Users",
-})
-export class User extends Model<User> {
-  @Column({ type: DataTypes.STRING, allowNull: false })
-  name!: string;
+import { DataTypes, Model, Sequelize } from "sequelize";
 
-  @Column({ type: DataTypes.STRING, allowNull: false, unique: true })
-  email!: string;
-
-  @Column({ type: DataTypes.STRING, allowNull: false, unique: true })
-  password!: string;
-
-  @Column({
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  })
-  createdAt!: Date;
-
-  @Column({
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  })
-  updatedAt!: Date;
+import { sequelize } from "./index";
+class User extends Model {
+  /**
+   * Helper method for defining associations.
+   * This method is not a part of Sequelize lifecycle.
+   * The `models/index` file will call this method automatically.
+   */
+  static associate(models: any) {
+    // define association here
+  }
 }
+User.init(
+  {
+    name: DataTypes.STRING,
+    email: DataTypes.STRING,
+    verifiedEmail: DataTypes.BOOLEAN,
+    password: DataTypes.STRING,
+  },
+  {
+    sequelize,
+    modelName: "User",
+    tableName: "Users",
+  }
+);
 
 export default User;
