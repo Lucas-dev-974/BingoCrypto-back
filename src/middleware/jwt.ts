@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { publicRoutes } from "./publicRoutes";
 import jwt from "jsonwebtoken";
-import { UserInterface } from "../interface/models";
 import bcrypt from "bcrypt";
+import { UserAttributes } from "../interface/models";
 
 class AuthMiddleware {
   static saltRounds = 10;
   public authenticateToken(req: Request, res: Response, next: NextFunction) {
+    console.log("PATH route:", req.path, publicRoutes.includes(req.path));
+
     if (publicRoutes.includes(req.path)) {
       return next();
     }
@@ -18,6 +20,7 @@ class AuthMiddleware {
       return res.sendStatus(401);
     }
 
+    // * TODO Refactor use validateToken
     jwt.verify(
       token,
       process.env.ACCESS_TOKEN_SECRET as string,
@@ -31,7 +34,7 @@ class AuthMiddleware {
     );
   }
 
-  public generateToken(user: UserInterface): string {
+  public generateToken(user: UserAttributes): string {
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET as string, {
       expiresIn: "1h",
     });
@@ -58,6 +61,18 @@ class AuthMiddleware {
       return match;
     } catch (error) {
       return false;
+    }
+  }
+
+  public validateToken(token: any) {
+    try {
+      const decoded = jwt.verify(
+        token,
+        process.env.ACCESS_TOKEN_SECRET as string
+      );
+      return decoded;
+    } catch (error) {
+      throw new Error("Invalid or expired token");
     }
   }
 }

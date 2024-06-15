@@ -44,6 +44,26 @@ class EmailService {
       throw error;
     }
   }
+
+  public async sendVerificationEmail(to: string, token: string): Promise<void> {
+    const verificationUrl = `http://localhost:3000/api/auth/verify-email?token=${token}`;
+
+    const mailOptions = {
+      from: '"YourAppName" <your-email@example.com>',
+      to,
+      subject: "Email Verification",
+      text: `Please verify your email by clicking the following link: ${verificationUrl}`,
+      html: `<p>Please verify your email by clicking the following link: <a href="${verificationUrl}">Verify Email</a></p>`,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Verification email sent to ${to}`);
+    } catch (error) {
+      console.error("Error sending email:", error);
+      throw error;
+    }
+  }
 }
 
 export default new EmailService();
