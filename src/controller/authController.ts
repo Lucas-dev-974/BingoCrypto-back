@@ -30,12 +30,13 @@ export class AuthControlleur {
 
     const userToReturn: Omit<
       UserAttributes,
-      "password" | "createdAt" | "updatedAt" | "verifiedEmail"
+      "password" | "createdAt" | "updatedAt"
     > = {
       name: user.name,
       email: user.email,
       id: user.id,
       token: AuthMiddleware.generateToken({ ...user }),
+      verifiedEmail: user.verifiedEmail ?? false,
     };
 
     return res.status(200).json(userToReturn);
@@ -75,12 +76,13 @@ export class AuthControlleur {
 
       const userToReturn: Omit<
         UserAttributes,
-        "password" | "createdAt" | "updatedAt" | "verifiedEmail"
+        "password" | "createdAt" | "updatedAt"
       > = {
         name: user.name,
         email: user.email,
         id: user.id,
         token: AuthMiddleware.generateToken({ ...user }),
+        verifiedEmail: user.verifiedEmail ?? false,
       };
 
       await EmailService.sendVerificationEmail(
