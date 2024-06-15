@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import User from "../models/user";
 import validate from "validate.js";
 import AuthMiddleware from "../middleware/jwt";
 import { UniqueConstraintError } from "sequelize";
-import { UserInterface } from "../interface/models";
 import EmailService from "../services/mailer";
-
+import User from "../models/user";
+import { UserAttributes } from "../interface/models";
 export class AuthControlleur {
   static async login(req: Request, res: Response) {
     const constraint = {
@@ -16,7 +15,7 @@ export class AuthControlleur {
     if (validate(req.body, constraint))
       return res.status(403).json(validate(req.body, constraint));
 
-    const user: UserInterface | undefined = (
+    const user: UserAttributes | undefined = (
       await User.findOne({
         where: { email: req.body.email },
       })
@@ -30,8 +29,8 @@ export class AuthControlleur {
     }
 
     const userToReturn: Omit<
-      UserInterface,
-      "password" | "createdAt" | "updatedAt"
+      UserAttributes,
+      "password" | "createdAt" | "updatedAt" | "verifiedEmail"
     > = {
       name: user.name,
       email: user.email,
@@ -62,7 +61,12 @@ export class AuthControlleur {
       return res.status(403).json(validate(req.body, constraint));
 
     try {
-      const user: UserInterface = (
+      console.log({
+        ...req.body,
+        password: await AuthMiddleware.hashPasswordasync(req.body.password),
+      });
+
+      const user: UserAttributes = (
         await User.create({
           ...req.body,
           password: await AuthMiddleware.hashPasswordasync(req.body.password),
@@ -70,8 +74,8 @@ export class AuthControlleur {
       ).dataValues;
 
       const userToReturn: Omit<
-        UserInterface,
-        "password" | "createdAt" | "updatedAt"
+        UserAttributes,
+        "password" | "createdAt" | "updatedAt" | "verifiedEmail"
       > = {
         name: user.name,
         email: user.email,
@@ -79,15 +83,10 @@ export class AuthControlleur {
         token: AuthMiddleware.generateToken({ ...user }),
       };
 
-      try {
-        await EmailService.sendEmail(
-          "lucas.lvn97439@gmail.com",
-          "teste",
-          "ceci est un texte pour tester le service de mailing"
-        );
-      } catch (error) {
-        // ! TODO manage error mail
-      }
+      await EmailService.sendVerificationEmail(
+        req.body.email,
+        AuthMiddleware.generateToken({ ...user })
+      );
 
       return res.status(200).json(userToReturn);
     } catch (error) {
@@ -98,6 +97,25 @@ export class AuthControlleur {
       }
 
       return res.status(403).json("error");
+    }
+  }
+
+  static async verifyEmail(req: Request, res: Response) {
+    const { token } = req.query;
+
+    try {
+      const decodedToken: UserAttributes = AuthMiddleware.validateToken(
+        token
+      ) as UserAttributes;
+
+      const user = await User.findByPk(decodedToken.id);
+      user?.update({ verifiedEmail: true });
+      user?.save();
+
+      res.status(200).json({ message: "Email verified successfully." });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ error: "Error verifying email." });
     }
   }
 }
