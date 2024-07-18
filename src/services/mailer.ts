@@ -30,12 +30,6 @@ class EmailService {
       text,
     };
 
-    console.log(
-      "email credential:",
-      process.env.EMAIL_USER,
-      process.env.EMAIL_PASS
-    );
-
     try {
       const info = await this.transporter.sendMail(mailOptions);
       console.log("Email sent: " + info.response);
