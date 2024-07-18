@@ -7,7 +7,7 @@ import { UserAttributes } from "../interface/models";
 class AuthMiddleware {
   static saltRounds = 10;
   public authenticateToken(req: Request, res: Response, next: NextFunction) {
-    console.log("PATH route:", req.path, publicRoutes.includes(req.path));
+    console.log(req.path, publicRoutes.includes(req.path));
 
     if (publicRoutes.includes(req.path)) {
       return next();
