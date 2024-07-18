@@ -5,6 +5,8 @@ import { UniqueConstraintError } from "sequelize";
 import EmailService from "../services/mailer";
 import User from "../models/user";
 import { UserAttributes } from "../interface/models";
+import mailer from "../services/mailer";
+
 export class AuthControlleur {
   static async login(req: Request, res: Response) {
     const constraint = {
@@ -95,7 +97,7 @@ export class AuthControlleur {
       console.log(error);
 
       if (error instanceof UniqueConstraintError) {
-        return res.status(400).json({ message: "Cet email est déjà utilisé." });
+        return res.status(400).json("Cet email est déjà utilisé.");
       }
 
       return res.status(403).json("error");
@@ -120,4 +122,63 @@ export class AuthControlleur {
       res.status(500).json({ error: "Error verifying email." });
     }
   }
+
+  static async checkToken(req: Request, res: Response) {
+    const { token } = req.query;
+
+    try {
+      const decodedToken: UserAttributes = AuthMiddleware.validateToken(
+        token
+      ) as UserAttributes;
+
+      res.status(200).json({ message: "ok" });
+    } catch (error) {
+      res.status(500).json({ message: "Connexion invalide" });
+    }
+  }
+
+  static async requestReset(req: Request, res: Response) {
+    const constraint = {
+      email: {
+        presence: true,
+        email: true,
+      },
+    };
+
+    if (validate(req.body, constraint))
+      return res.status(403).json(validate(req.body, constraint));
+
+    const { email } = req.body;
+    const user: UserAttributes | undefined = (
+      await User.findOne({
+        where: { email: email },
+      })
+    )?.dataValues;
+
+    if (!user) {
+      return res
+        .status(400)
+        .send(
+          "Aucun utilisatuer avec cet email est enregistrer, veuillez vous inscrire."
+        );
+    }
+
+    const token = AuthMiddleware.generateToken({ ...user });
+
+    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    await mailer.sendEmail(
+      email,
+      "Réinitialisation de mot de passe",
+      // `Click here to reset your password: ${resetLink}`
+      "teset teste"
+    );
+
+    return res
+      .status(200)
+      .json(
+        "Un mail vous à été envoyer pour la réinitialisation de votre mot de passe."
+      );
+  }
+
+  static async resetPassword(req: Request, res: Response) {}
 }
