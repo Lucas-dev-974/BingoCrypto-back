@@ -3,9 +3,9 @@ import validate from "validate.js";
 import AuthMiddleware from "../middleware/jwt";
 import { UniqueConstraintError } from "sequelize";
 import EmailService from "../services/mailer";
-import { User } from "../models/user";
 import { UserAttributes } from "../interface/models";
 import mailer from "../services/mailer";
+import { User } from "../models/user";
 
 export class AuthControlleur {
   static async login(req: Request, res: Response) {
