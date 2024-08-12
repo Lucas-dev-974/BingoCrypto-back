@@ -6,7 +6,7 @@ import { User } from './user';
 export class BingoCard extends Model<BingoCard> {
   @Column({
     type: DataType.ARRAY(DataType.ARRAY(DataType.INTEGER)),
-    allowNull: false, // Si la colonne peut être NULL
+    allowNull: false, // colonne non null
   })
   number!: number[][];
 

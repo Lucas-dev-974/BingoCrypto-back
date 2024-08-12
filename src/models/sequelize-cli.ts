@@ -1,6 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 import { User } from './user';
 import { BingoCard } from './BingoCard';
+import { Games } from './Games';
+import { DrawnNumber } from './DrawnNumber';
 
 // Initialisation de Sequelize
 const sequelize = new Sequelize({
@@ -9,7 +11,7 @@ const sequelize = new Sequelize({
     database: "bingo_reunion",
     host: "127.0.0.1",
     dialect: "postgres",
-    models: [User, BingoCard], // Déclarez vos modèles ici
+    models: [User, BingoCard, Games, DrawnNumber], // Déclarez vos modèles ici
 });
 
 export default sequelize;
