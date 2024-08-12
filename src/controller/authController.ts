@@ -3,7 +3,7 @@ import validate from "validate.js";
 import AuthMiddleware from "../middleware/jwt";
 import { UniqueConstraintError } from "sequelize";
 import EmailService from "../services/mailer";
-import User from "../models/user";
+import { User } from "../models/user";
 import { UserAttributes } from "../interface/models";
 import mailer from "../services/mailer";
 
@@ -17,31 +17,40 @@ export class AuthControlleur {
     if (validate(req.body, constraint))
       return res.status(403).json(validate(req.body, constraint));
 
-    const user: UserAttributes | undefined = (
-      await User.findOne({
-        where: { email: req.body.email },
-      })
-    )?.dataValues;
+    console.log("before search user login");
 
-    if (
-      !user ||
-      !(await AuthMiddleware.comparePassword(req.body.password, user.password))
-    ) {
-      return res.status(401).json("Les identifiants ne sont pas compatible.");
-    }
+    // const user = (
+    //   await User.findOne({
+    //     where: { email: req.body.email },
+    //   })
+    // )?.dataValues;
 
-    const userToReturn: Omit<
-      UserAttributes,
-      "password" | "createdAt" | "updatedAt"
-    > = {
-      name: user.name,
-      email: user.email,
-      id: user.id,
-      token: AuthMiddleware.generateToken({ ...user }),
-      verifiedEmail: user.verifiedEmail ?? false,
-    };
+    const user = await User.findOne({
+      where: { email: req.body.email }
+    })
 
-    return res.status(200).json(userToReturn);
+    return res.status(200).json(user?.dataValues)
+    // console.log("after search user login:", user);
+
+    // if (
+    //   !user ||
+    //   !(await AuthMiddleware.comparePassword(req.body.password, user.password))
+    // ) {
+    //   return res.status(401).json("Les identifiants ne sont pas compatible.");
+    // }
+
+    // const userToReturn: Omit<
+    //   UserAttributes,
+    //   "password" | "createdAt" | "updatedAt"
+    // > = {
+    //   name: user.name,
+    //   email: user.email,
+    //   id: user.id,
+    //   token: AuthMiddleware.generateToken({ ...user as UserAttributes }),
+    //   verifiedEmail: user.verifiedEmail ?? false,
+    // };
+
+    // return res.status(200).json(userToReturn);
   }
 
   static async register(req: Request, res: Response) {
@@ -64,17 +73,21 @@ export class AuthControlleur {
       return res.status(403).json(validate(req.body, constraint));
 
     try {
-      console.log({
-        ...req.body,
-        password: await AuthMiddleware.hashPasswordasync(req.body.password),
-      });
+      // console.log({
+      //   ...req.body,
+      //   password: await AuthMiddleware.hashPasswordasync(req.body.password),
+      // });
 
-      const user: UserAttributes = (
+      console.log("Before user creation");
+
+      const user = (
         await User.create({
           ...req.body,
           password: await AuthMiddleware.hashPasswordasync(req.body.password),
         })
       ).dataValues;
+
+      console.log("USER CREATED:", user);
 
       const userToReturn: Omit<
         UserAttributes,
@@ -83,14 +96,14 @@ export class AuthControlleur {
         name: user.name,
         email: user.email,
         id: user.id,
-        token: AuthMiddleware.generateToken({ ...user }),
+        token: AuthMiddleware.generateToken({ ...user as UserAttributes }),
         verifiedEmail: user.verifiedEmail ?? false,
       };
 
-      await EmailService.sendVerificationEmail(
-        req.body.email,
-        AuthMiddleware.generateToken({ ...user })
-      );
+      // await EmailService.sendVerificationEmail(
+      //   req.body.email,
+      //   AuthMiddleware.generateToken({ ...user as UserAttributes })
+      // );
 
       return res.status(200).json(userToReturn);
     } catch (error) {
@@ -149,7 +162,7 @@ export class AuthControlleur {
       return res.status(403).json(validate(req.body, constraint));
 
     const { email } = req.body;
-    const user: UserAttributes | undefined = (
+    const user = (
       await User.findOne({
         where: { email: email },
       })
@@ -163,7 +176,7 @@ export class AuthControlleur {
         );
     }
 
-    const token = AuthMiddleware.generateToken({ ...user });
+    const token = AuthMiddleware.generateToken({ ...user as UserAttributes });
 
     const resetLink = `http://localhost:3000/reset-password?token=${token}`;
     await mailer.sendEmail(
@@ -180,5 +193,5 @@ export class AuthControlleur {
       );
   }
 
-  static async resetPassword(req: Request, res: Response) {}
+  static async resetPassword(req: Request, res: Response) { }
 }

@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
-import User from "./user";
+import { User } from "./user";
+
 
 const database = process.env.DATABASE || "database";
 const userDB = process.env.USER_DB || "user_db";
@@ -12,7 +13,7 @@ const sequelize = new Sequelize({
   username: userDB,
   password: passwordDB,
   database: database,
-  host: hostDB,
+  host: hostDB
 });
 
 const models = {

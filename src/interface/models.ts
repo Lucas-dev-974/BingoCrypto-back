@@ -1,5 +1,5 @@
 export interface UserAttributes {
-  id: number;
+  id?: number;
   name: string;
   email: string;
   verifiedEmail: boolean;
