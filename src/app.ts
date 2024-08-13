@@ -11,7 +11,7 @@ import sequelize from "./models/sequelize-cli";
 const app: express.Application = express();
 
 async function StartServer() {
-  await sequelize.sync({ force: true });
+  sequelize.sync();
 
 
   const server = createServer(app);

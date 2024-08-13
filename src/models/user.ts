@@ -16,6 +16,27 @@ export class User extends Model<User> {
   @Column
   password!: string;
 
+  @Column
+  gender?: string;
+
+  @Column
+  birthday!: Date;
+
+
+  @Column
+  country?: string;
+
+  @Column
+  city?: string;
+
+  @Column
+  postal?: string;
+
+  @Column
+  phone?: string;
+
+  @Column
+  address?: string;
 
   @HasMany(() => BingoCard)
   bingoCard!: BingoCard[];

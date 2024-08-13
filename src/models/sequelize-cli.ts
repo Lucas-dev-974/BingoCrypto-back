@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize-typescript';
-import { User } from './user';
+import { User } from './User';
 import { BingoCard } from './BingoCard';
 import { Games } from './Games';
 import { DrawnNumber } from './DrawnNumber';

@@ -5,7 +5,7 @@ import { UniqueConstraintError } from "sequelize";
 import EmailService from "../services/mailer";
 import { UserAttributes } from "../interface/models";
 import mailer from "../services/mailer";
-import { User } from "../models/user";
+import { User } from "../models/User";
 
 export class AuthControlleur {
   static async login(req: Request, res: Response) {
@@ -19,38 +19,33 @@ export class AuthControlleur {
 
     console.log("before search user login");
 
-    // const user = (
-    //   await User.findOne({
-    //     where: { email: req.body.email },
-    //   })
-    // )?.dataValues;
+    const user = (
+      await User.findOne({
+        where: { email: req.body.email },
+      })
+    )?.dataValues;
 
-    const user = await User.findOne({
-      where: { email: req.body.email }
-    })
+    console.log("after search user login:", user);
 
-    return res.status(200).json(user?.dataValues)
-    // console.log("after search user login:", user);
+    if (
+      !user ||
+      !(await AuthMiddleware.comparePassword(req.body.password, user.password))
+    ) {
+      return res.status(401).json("Les identifiants ne sont pas compatible.");
+    }
 
-    // if (
-    //   !user ||
-    //   !(await AuthMiddleware.comparePassword(req.body.password, user.password))
-    // ) {
-    //   return res.status(401).json("Les identifiants ne sont pas compatible.");
-    // }
+    const userToReturn: Omit<
+      UserAttributes,
+      "password" | "createdAt" | "updatedAt"
+    > = {
+      name: user.name,
+      email: user.email,
+      id: user.id,
+      token: AuthMiddleware.generateToken({ ...user as UserAttributes }),
+      verifiedEmail: user.verifiedEmail ?? false,
+    };
 
-    // const userToReturn: Omit<
-    //   UserAttributes,
-    //   "password" | "createdAt" | "updatedAt"
-    // > = {
-    //   name: user.name,
-    //   email: user.email,
-    //   id: user.id,
-    //   token: AuthMiddleware.generateToken({ ...user as UserAttributes }),
-    //   verifiedEmail: user.verifiedEmail ?? false,
-    // };
-
-    // return res.status(200).json(userToReturn);
+    return res.status(200).json(userToReturn);
   }
 
   static async register(req: Request, res: Response) {
@@ -73,13 +68,6 @@ export class AuthControlleur {
       return res.status(403).json(validate(req.body, constraint));
 
     try {
-      // console.log({
-      //   ...req.body,
-      //   password: await AuthMiddleware.hashPasswordasync(req.body.password),
-      // });
-
-      console.log("Before user creation");
-
       const user = (
         await User.create({
           ...req.body,
