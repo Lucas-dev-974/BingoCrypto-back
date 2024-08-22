@@ -1,17 +1,28 @@
-import { GamesEnum } from "../controller/GameController";
 import { UserAttributes } from "../interface/models";
 
 type PlayerType = {
     user_id: number;
     token: string;
 }
-
+export enum GamesEnum {
+    kine = "KINE"
+}
 type RoomType = {
     name: string;
     gameName: GamesEnum;
     players: PlayerType[];
     id: number;
 }
+
+
+export const rooms: RoomType[] = [
+    {
+        id: 1,
+        gameName: GamesEnum.kine,
+        name: "KINE 1",
+        players: [],
+    }
+]
 
 class RoomManager {
     // L'instance unique de la classe, initialement non définie

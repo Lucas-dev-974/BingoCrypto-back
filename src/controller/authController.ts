@@ -17,7 +17,6 @@ export class AuthControlleur {
     if (validate(req.body, constraint))
       return res.status(403).json(validate(req.body, constraint));
 
-    console.log("before search user login");
 
     const user = (
       await User.findOne({
@@ -25,7 +24,6 @@ export class AuthControlleur {
       })
     )?.dataValues;
 
-    console.log("after search user login:", user);
 
     if (
       !user ||

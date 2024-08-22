@@ -1,11 +1,8 @@
 import { Request, Response } from "express";
-import RoomManager from "../utils/RoomManager";
-import { rooms } from "../router/WSRouter";
+import RoomManager, { GamesEnum, rooms } from "../utils/RoomManager";
 import { validate } from "validate.js";
 
-export enum GamesEnum {
-    kine = "KINE"
-}
+
 
 const games = [
     {
@@ -32,6 +29,6 @@ export class GameController {
         if (validate(req.query, constraint))
             return res.status(403).json(validate(req.query, constraint));
 
-        return res.status(200).json(rooms.filter(room => room.name == req.body.gameName))
+        return res.status(200).json(rooms.filter(room => room.gameName == req.query.gameName))
     }
 }
