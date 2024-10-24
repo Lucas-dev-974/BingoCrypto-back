@@ -1,14 +1,12 @@
 import { Request, Response, NextFunction } from "express";
+import { UserAttributes } from "../models/User";
 import { publicRoutes } from "./publicRoutes";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { UserAttributes } from "../interface/models";
 
 class AuthMiddleware {
   static saltRounds = 10;
   public authenticateToken(req: Request, res: Response, next: NextFunction) {
-    console.log(req.path, publicRoutes.includes(req.path));
-
     if (publicRoutes.includes(req.path)) {
       return next();
     }
