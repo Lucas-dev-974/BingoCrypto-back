@@ -3,9 +3,8 @@ import validate from "validate.js";
 import AuthMiddleware from "../middleware/jwt";
 import { UniqueConstraintError } from "sequelize";
 import EmailService from "../services/mailer";
-import User from "../models/user";
-import { UserAttributes } from "../interface/models";
 import mailer from "../services/mailer";
+import { UserAttributes, Users } from "../models/User";
 
 export class AuthControlleur {
   static async login(req: Request, res: Response) {
@@ -18,7 +17,7 @@ export class AuthControlleur {
       return res.status(403).json(validate(req.body, constraint));
 
     const user: UserAttributes | undefined = (
-      await User.findOne({
+      await Users.findOne({
         where: { email: req.body.email },
       })
     )?.dataValues;
@@ -33,12 +32,10 @@ export class AuthControlleur {
     const userToReturn: Omit<
       UserAttributes,
       "password" | "createdAt" | "updatedAt"
-    > = {
-      name: user.name,
-      email: user.email,
-      id: user.id,
+    > & { token: string } = {
+      ...user,
+      verified_email: user.verified_email ?? false,
       token: AuthMiddleware.generateToken({ ...user }),
-      verifiedEmail: user.verifiedEmail ?? false,
     };
 
     return res.status(200).json(userToReturn);
@@ -58,19 +55,19 @@ export class AuthControlleur {
           message: "Votre mot de passe doit comporté au minimun 6 charactères",
         },
       },
+      last_name: { presence: true },
+      birthday: { presence: true },
+      address: { presence: true },
+      phone: { presence: true },
+      postal_code: { presence: true },
     };
 
     if (validate(req.body, constraint))
       return res.status(403).json(validate(req.body, constraint));
 
     try {
-      console.log({
-        ...req.body,
-        password: await AuthMiddleware.hashPasswordasync(req.body.password),
-      });
-
       const user: UserAttributes = (
-        await User.create({
+        await Users.create({
           ...req.body,
           password: await AuthMiddleware.hashPasswordasync(req.body.password),
         })
@@ -79,12 +76,10 @@ export class AuthControlleur {
       const userToReturn: Omit<
         UserAttributes,
         "password" | "createdAt" | "updatedAt"
-      > = {
-        name: user.name,
-        email: user.email,
-        id: user.id,
+      > & { token: string } = {
+        ...user,
         token: AuthMiddleware.generateToken({ ...user }),
-        verifiedEmail: user.verifiedEmail ?? false,
+        verified_email: user.verified_email ?? false,
       };
 
       await EmailService.sendVerificationEmail(
@@ -112,8 +107,8 @@ export class AuthControlleur {
         token
       ) as UserAttributes;
 
-      const user = await User.findByPk(decodedToken.id);
-      user?.update({ verifiedEmail: true });
+      const user = await Users.findByPk(decodedToken.id);
+      user?.update({ verified_email: true });
       user?.save();
 
       res.status(200).json({ message: "Email verified successfully." });
@@ -125,15 +120,16 @@ export class AuthControlleur {
 
   static async checkToken(req: Request, res: Response) {
     const { token } = req.query;
+    console.log("token:", token);
 
     try {
       const decodedToken: UserAttributes = AuthMiddleware.validateToken(
         token
       ) as UserAttributes;
 
-      res.status(200).json({ message: "ok" });
+      res.status(200).json({ message: "ok", status: true });
     } catch (error) {
-      res.status(500).json({ message: "Connexion invalide" });
+      res.status(401).json({ message: "Connexion invalide", status: false });
     }
   }
 
@@ -150,7 +146,7 @@ export class AuthControlleur {
 
     const { email } = req.body;
     const user: UserAttributes | undefined = (
-      await User.findOne({
+      await Users.findOne({
         where: { email: email },
       })
     )?.dataValues;
